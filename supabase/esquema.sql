@@ -62,3 +62,10 @@ create policy "familia sube fotos" on storage.objects for insert to authenticate
 drop policy if exists "familia borra fotos" on storage.objects;
 create policy "familia borra fotos" on storage.objects for delete to authenticated
   using (bucket_id = 'fotos' and public.is_member());
+
+-- catálogos (los sube el robot mensual de GitHub; usuario robot.catalogo@example.com)
+
+insert into storage.buckets (id,name,public) values ('catalogo','catalogo',true) on conflict (id) do update set public=true;
+drop policy if exists "robot catalogo" on storage.objects;
+create policy "robot catalogo" on storage.objects for all to authenticated
+  using (bucket_id='catalogo' and auth.uid()='<id del robot>'::uuid) with check (bucket_id='catalogo' and auth.uid()='<id del robot>'::uuid);

@@ -370,7 +370,7 @@ const CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-w
 const S={products:[],stores:[],trips:[],cur:{},tab:'lista',q:'',pq:'',sheet:null,edit:null,db:null,assets:null,status:'loading',openTrip:null,confirm:null,photoSlot:null,busy:false,
   cats:{},catStore:'mercadona',catErr:false,cq:'',ctop:null,catMode:'add'};
 /* offline catalogue copies, downloaded by herramientas/actualizar_<store>.py (Mercadona: postal code 28760) */
-const CAT_COLS=8,catDir=st=>`catalogo/${st}/`;
+const CAT_COLS=8,catDir=st=>`${SB_URL}/storage/v1/object/public/catalogo/${st}/`;
 const MER_CATS={1:'Fruta y verdura',2:'Carne y pescado',3:'Carne y pescado',4:'Charcutería y quesos',5:'Panadería',6:'Lácteos y huevos',7:'Desayuno y dulces',8:'Desayuno y dulces',9:'Desayuno y dulces',10:'Bebidas',11:'Lácteos y huevos',12:'Despensa',13:'Despensa',14:'Conservas y salsas',15:'Despensa',16:'Otros',17:'Congelados',18:'Bebidas',19:'Bebidas',20:'Higiene',21:'Higiene',22:'Higiene',23:'Higiene',24:'Higiene',25:'Otros',26:'Limpieza'};
 /* Consum, Ahorramas and BM subsections carry their app section in the JSON (subs[id].cat) */
 const CATALOGS={mercadona:{name:'Mercadona',cats:MER_CATS},consum:{name:'Consum',cats:{}},ahorramas:{name:'Ahorramas',cats:{}},bm:{name:'BM',cats:{}}};

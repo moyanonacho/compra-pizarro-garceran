@@ -1,4 +1,4 @@
-# Cada 30 días descarga el catálogo de Mercadona (Tres Cantos, 28760) y lo sube a la web.
+# Cada mes descarga el catálogo de Mercadona (Tres Cantos, 28760) y lo sube a Supabase, de donde lo lee la web.
 name: Catálogo Mercadona
 on:
   schedule:
@@ -15,28 +15,22 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pillow
+      - run: pip install pillow requests
       - name: Descargar catálogo
-        run: python herramientas/actualizar_mercadona.py catalogo/mercadona.nuevo
-      - name: Sustituir el catálogo anterior
+        run: python herramientas/actualizar_mercadona.py nuevo
+      - name: Comprobar que está completo
+        run: python -c "import json;d=json.load(open('nuevo/mercadona.json'));n=len(d['p']);print(n,'productos');assert n>2000,'catálogo sospechosamente pequeño'"
+      - name: Subir a Supabase
+        env:
+          ROBOT_EMAIL: ${{ secrets.ROBOT_EMAIL }}
+          ROBOT_PASSWORD: ${{ secrets.ROBOT_PASSWORD }}
+        run: python herramientas/subir_catalogo.py nuevo mercadona | tee -a registro.txt
+      - name: Apuntarlo en el registro
+        # una subida al mes mantiene vivo el repositorio (GitHub para las tareas programadas tras 60 días sin cambios)
         run: |
-          python - <<'PY'
-          import json, pathlib, shutil
-          new, old = pathlib.Path("catalogo/mercadona.nuevo"), pathlib.Path("catalogo/mercadona")
-          d = json.loads((new / "mercadona.json").read_text(encoding="utf-8"))
-          assert len(d["p"]) > 2000, f"catálogo sospechosamente pequeño: {len(d['p'])} productos"
-          shutil.rmtree(old)
-          old.mkdir()
-          shutil.copy(new / "mercadona.json", old)
-          for k in d["subs"]:
-              shutil.copy(new / f"s{k}.jpg", old)
-          shutil.rmtree(new)
-          print(len(d["p"]), "productos,", len(d["subs"]), "láminas")
-          PY
-      - name: Publicar
-        run: |
+          sed -i "\$s/^/$(date +%F) /" registro.txt
           git config user.name "Catálogo automático"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A catalogo/mercadona
-          git diff --cached --quiet || git commit -m "Catálogo Mercadona $(date +%F)"
+          git add registro.txt
+          git commit -m "Catálogo Mercadona $(date +%F)"
           git push
