@@ -1,0 +1,42 @@
+# Cada 30 días descarga el catálogo de Mercadona (Tres Cantos, 28760) y lo sube a la web.
+name: Catálogo Mercadona
+on:
+  schedule:
+    - cron: "17 8 1 * *"   # día 1 de cada mes, 08:17 UTC
+  workflow_dispatch: {}     # también se puede lanzar a mano desde la pestaña Actions
+permissions:
+  contents: write
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pillow
+      - name: Descargar catálogo
+        run: python herramientas/actualizar_mercadona.py catalogo/mercadona.nuevo
+      - name: Sustituir el catálogo anterior
+        run: |
+          python - <<'PY'
+          import json, pathlib, shutil
+          new, old = pathlib.Path("catalogo/mercadona.nuevo"), pathlib.Path("catalogo/mercadona")
+          d = json.loads((new / "mercadona.json").read_text(encoding="utf-8"))
+          assert len(d["p"]) > 2000, f"catálogo sospechosamente pequeño: {len(d['p'])} productos"
+          shutil.rmtree(old)
+          old.mkdir()
+          shutil.copy(new / "mercadona.json", old)
+          for k in d["subs"]:
+              shutil.copy(new / f"s{k}.jpg", old)
+          shutil.rmtree(new)
+          print(len(d["p"]), "productos,", len(d["subs"]), "láminas")
+          PY
+      - name: Publicar
+        run: |
+          git config user.name "Catálogo automático"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A catalogo/mercadona
+          git diff --cached --quiet || git commit -m "Catálogo Mercadona $(date +%F)"
+          git push

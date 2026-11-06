@@ -1,0 +1,14 @@
+# Supabase gratis pausa el proyecto tras 7 días sin uso: cada 3 días se le hace una consulta.
+name: Mantener Supabase despierto
+on:
+  schedule:
+    - cron: "41 6 */3 * *"
+  workflow_dispatch: {}
+permissions: {}
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -fsS "https://eralhpnstnbyznwthkmz.supabase.co/rest/v1/docs?select=id&limit=1" \
+            -H "apikey: sb_publishable_8_hwEm1tK5NS3G0iRbj9kw_CZMsvBbu" -o /dev/null -w "%{http_code}\n"
