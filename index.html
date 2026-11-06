@@ -332,7 +332,7 @@ img.broken{display:none}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.0/dist/umd/supabase.js"></script>
 <script>
 /* Puente con Supabase: imita la base de datos y las fotos de claude.ai para que el resto de la app no cambie. */
-const SB_URL='https://eralhpnstnbyznwthkmz.supabase.co',SB_KEY='sb_publishable_8_hwEm1tK5NS3G0iRbj9kw_CZMsvBbu',FAMILY_EMAIL='FAMILY_EMAIL_PENDIENTE';
+const SB_URL='https://eralhpnstnbyznwthkmz.supabase.co',SB_KEY='sb_publishable_8_hwEm1tK5NS3G0iRbj9kw_CZMsvBbu',FAMILY_EMAIL='apizarroaguilera@hotmail.com';
 const SB=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:'compra-pizarro'}});
 const blobUrl=id=>`${SB_URL}/storage/v1/object/public/fotos/${encodeURIComponent(id)}`;
 const SBDB=(()=>{
