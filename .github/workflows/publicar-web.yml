@@ -1,0 +1,36 @@
+# Publica la web en GitHub Pages. Da 30 minutos (el sistema automático de Pages solo da 10 y no le basta con las fotos).
+name: Publicar web
+on:
+  push:
+    branches: [main]
+  workflow_run:                 # las subidas del robot de Mercadona no lanzan "push", así que se engancha aquí
+    workflows: ["Catálogo Mercadona"]
+    types: [completed]
+  workflow_dispatch: {}
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  publicar:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deploy
+        uses: actions/deploy-pages@v4
+        with:
+          timeout: 1800000
