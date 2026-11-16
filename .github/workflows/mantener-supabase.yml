@@ -1,14 +1,26 @@
-# Supabase gratis pausa el proyecto tras 7 días sin uso: cada 3 días se le hace una consulta.
+# Supabase gratis pausa el proyecto si no ve actividad en 7 días.
+# Cada día: una escritura real en la base de datos (función latido), un inicio de sesión del robot y una lectura de archivos.
 name: Mantener Supabase despierto
 on:
   schedule:
-    - cron: "41 6 */3 * *"
+    - cron: "41 6 * * *"
   workflow_dispatch: {}
 permissions: {}
 jobs:
-  ping:
+  latido:
     runs-on: ubuntu-latest
+    env:
+      SB: https://eralhpnstnbyznwthkmz.supabase.co
+      KEY: sb_publishable_8_hwEm1tK5NS3G0iRbj9kw_CZMsvBbu
     steps:
-      - run: |
-          curl -fsS "https://eralhpnstnbyznwthkmz.supabase.co/rest/v1/docs?select=id&limit=1" \
-            -H "apikey: sb_publishable_8_hwEm1tK5NS3G0iRbj9kw_CZMsvBbu" -o /dev/null -w "%{http_code}\n"
+      - name: Escribir en la base de datos
+        run: curl -fsS -X POST "$SB/rest/v1/rpc/latido" -H "apikey: $KEY" -H "Content-Type: application/json" -d '{}'
+      - name: Iniciar sesión (robot)
+        env:
+          ROBOT_EMAIL: ${{ secrets.ROBOT_EMAIL }}
+          ROBOT_PASSWORD: ${{ secrets.ROBOT_PASSWORD }}
+        run: |
+          curl -fsS -o /dev/null -X POST "$SB/auth/v1/token?grant_type=password" -H "apikey: $KEY" -H "Content-Type: application/json" \
+            -d "{\"email\":\"$ROBOT_EMAIL\",\"password\":\"$ROBOT_PASSWORD\"}" && echo "sesión ok"
+      - name: Leer un archivo
+        run: curl -fsS -o /dev/null -w "%{http_code}\n" "$SB/storage/v1/object/public/catalogo/mercadona/mercadona.json"
