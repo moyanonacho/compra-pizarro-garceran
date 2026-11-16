@@ -14,7 +14,8 @@ jobs:
       KEY: sb_publishable_8_hwEm1tK5NS3G0iRbj9kw_CZMsvBbu
     steps:
       - name: Escribir en la base de datos
-        run: curl -fsS -X POST "$SB/rest/v1/rpc/latido" -H "apikey: $KEY" -H "Content-Type: application/json" -d '{}'
+        run: |
+          curl -fsS -X POST "$SB/rest/v1/rpc/latido" -H "apikey: $KEY" -H "Content-Type: application/json" -d '{}'
       - name: Iniciar sesión (robot)
         env:
           ROBOT_EMAIL: ${{ secrets.ROBOT_EMAIL }}
